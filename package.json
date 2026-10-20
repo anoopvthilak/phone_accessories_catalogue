@@ -2,13 +2,18 @@
   "name": "phone_accessories_catalogue",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "node --env-file=.env.local scripts/seed.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.12",
+    "mongoose": "^9.11.2",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"
