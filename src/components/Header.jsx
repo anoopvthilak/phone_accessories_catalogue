@@ -35,7 +35,7 @@ export default function Header({ user }) {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-extrabold text-sm sm:text-base shadow-lg shadow-blue-500/20 border border-blue-400/20 group-hover:scale-105 transition-transform">
-                PA
+                CW
               </div>
               <div>
                 <div className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5 leading-tight">
@@ -54,11 +54,10 @@ export default function Header({ user }) {
             <nav className="hidden md:flex items-center gap-1 bg-[#121826] p-1 rounded-2xl border border-slate-800">
               <Link
                 href="/"
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  isCatalogue
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                }`}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${isCatalogue
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -68,11 +67,10 @@ export default function Header({ user }) {
 
               <Link
                 href="/enquiries"
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  isEnquiries
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                }`}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${isEnquiries
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -82,11 +80,10 @@ export default function Header({ user }) {
 
               <Link
                 href="/warranties"
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  isWarranties
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                }`}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${isWarranties
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -120,11 +117,10 @@ export default function Header({ user }) {
                   </div>
                 </div>
                 <span
-                  className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                    user.role === 'ADMIN'
-                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                      : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  }`}
+                  className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider ${user.role === 'ADMIN'
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    }`}
                 >
                   {user.role}
                 </span>
@@ -152,9 +148,8 @@ export default function Header({ user }) {
           {/* Catalogue Link */}
           <Link
             href="/"
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              isCatalogue ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${isCatalogue ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+              }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -165,9 +160,8 @@ export default function Header({ user }) {
           {/* Enquiries Link */}
           <Link
             href="/enquiries"
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              isEnquiries ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${isEnquiries ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+              }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -189,9 +183,8 @@ export default function Header({ user }) {
           {/* Warranties Link */}
           <Link
             href="/warranties"
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${
-              isWarranties ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition ${isWarranties ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+              }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />

@@ -1,6 +1,8 @@
 import { getSession } from '@/lib/auth.js';
 import WarrantiesView from '@/components/WarrantiesView';
 
+export const instant = false;
+
 export const metadata = {
   title: 'Customer Warranty & RMA Service Tracker | Retail Hub',
   description: 'Track customer warranty claims, service center status, and fast caller lookup for accessories',

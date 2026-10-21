@@ -1,6 +1,8 @@
 import { getSession } from '@/lib/auth.js';
 import EnquiriesView from '@/components/EnquiriesView';
 
+export const instant = false;
+
 export const metadata = {
   title: 'Customer Enquiries & Special Orders | Retail Hub',
   description: 'Manage customer enquiries, out of stock requests, new item orders, and fulfillment pipeline',
