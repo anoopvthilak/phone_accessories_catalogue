@@ -222,10 +222,17 @@ export async function POST(request) {
       );
     }
 
-    // Validate images (strictly reject data-URI / binary buffers)
+    // Validate images (strictly reject data-URI / binary buffers, max 3 images)
     const validImages = Array.isArray(images)
       ? images.filter((img) => typeof img === 'string' && img.trim() && !img.startsWith('data:image/'))
       : [];
+
+    if (validImages.length > 3) {
+      return NextResponse.json(
+        { error: 'A maximum of 3 product images is allowed' },
+        { status: 400 }
+      );
+    }
 
     const newProduct = await Product.create({
       name: name.trim(),

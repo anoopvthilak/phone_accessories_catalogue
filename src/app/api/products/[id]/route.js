@@ -5,6 +5,7 @@ import Product from '@/models/Product.js';
 import Category from '@/models/Category.js';
 import Brand from '@/models/Brand.js';
 import { getSession } from '@/lib/auth.js';
+import { deleteFromSpaces, isSpacesUrl } from '@/lib/spaces.js';
 
 // GET: Fetch product details by ID
 export async function GET(request, { params }) {
@@ -173,10 +174,17 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Strictly validate image URLs (no data URIs / binaries in MongoDB)
+    // Strictly validate image URLs (no data URIs / binaries in MongoDB, max 3 images)
     const validImages = Array.isArray(images)
       ? images.filter((img) => typeof img === 'string' && img.trim() && !img.startsWith('data:image/'))
       : existingProduct.images;
+
+    if (validImages.length > 3) {
+      return NextResponse.json(
+        { error: 'A maximum of 3 product images is allowed' },
+        { status: 400 }
+      );
+    }
 
     // Determine stock availability
     const isAvailable = inStock !== false && inStock !== 'false' && status !== 'OUT_OF_STOCK';
@@ -266,6 +274,17 @@ export async function DELETE(request, { params }) {
 
     // Permanently remove product from collection
     await Product.findByIdAndDelete(id);
+
+    // Clean up associated images in DigitalOcean Spaces if applicable
+    if (Array.isArray(product.images)) {
+      for (const imgUrl of product.images) {
+        if (isSpacesUrl(imgUrl)) {
+          deleteFromSpaces(imgUrl).catch((err) =>
+            console.error('Failed to clean up space image on product delete:', err)
+          );
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

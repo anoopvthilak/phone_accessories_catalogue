@@ -13,9 +13,16 @@ export default function ProductDetailModal({
   onProductDeleted,
 }) {
   const [isLiked, setIsLiked] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(
-    product?.images && product.images.length > 0 ? product.images[0] : null
-  );
+  const [selectedImageOverride, setSelectedImageOverride] = useState(null);
+  const [prevProductId, setPrevProductId] = useState(product?._id);
+
+  if (product?._id !== prevProductId) {
+    setPrevProductId(product?._id);
+    setSelectedImageOverride(null);
+  }
+
+  const selectedImage =
+    selectedImageOverride ?? (product?.images && product.images.length > 0 ? product.images[0] : null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
@@ -187,7 +194,7 @@ export default function ProductDetailModal({
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setSelectedImage(img)}
+                    onClick={() => setSelectedImageOverride(img)}
                     className={`relative w-14 h-14 rounded-xl bg-[#141b28] border-2 overflow-hidden flex-shrink-0 p-1 cursor-pointer transition ${
                       selectedImage === img
                         ? 'border-blue-500 shadow-md shadow-blue-500/30 scale-105'

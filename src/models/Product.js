@@ -60,16 +60,24 @@ const ProductSchema = new mongoose.Schema(
         message: 'MRP cannot be less than selling price',
       },
     },
-    // Store image URLs or storage paths only (Rule: Do not store image binaries in MongoDB)
+    // Store image URLs or storage paths only (Rule: Do not store image binaries in MongoDB). Max 3 images.
     images: {
       type: [String],
       default: [],
-      validate: {
-        validator: function (images) {
-          return images.every((img) => typeof img === 'string' && !img.startsWith('data:image/'));
+      validate: [
+        {
+          validator: function (images) {
+            return Array.isArray(images) && images.length <= 3;
+          },
+          message: 'A maximum of 3 product images is allowed',
         },
-        message: 'Image binaries/data-URIs are not allowed in MongoDB. Store image URLs or file paths.',
-      },
+        {
+          validator: function (images) {
+            return images.every((img) => typeof img === 'string' && !img.startsWith('data:image/'));
+          },
+          message: 'Image binaries/data-URIs are not allowed in MongoDB. Store image URLs or file paths.',
+        },
+      ],
     },
     description: {
       type: String,

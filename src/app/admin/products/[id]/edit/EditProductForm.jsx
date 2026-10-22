@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import ProductImageUploader from '@/components/ProductImageUploader';
 
 export default function EditProductForm({
   initialProduct,
@@ -26,7 +27,6 @@ export default function EditProductForm({
   const [mrp, setMrp] = useState(initialProduct.mrp?.toString() || '');
   const [inStock, setInStock] = useState(initialProduct.inStock !== false && initialProduct.status !== 'OUT_OF_STOCK');
   const [stock, setStock] = useState(initialProduct.stock?.toString() || '1');
-  const [imageUrl, setImageUrl] = useState('');
   const [images, setImages] = useState(initialProduct.images || []);
   const [description, setDescription] = useState(initialProduct.description || '');
   const [specKey, setSpecKey] = useState('');
@@ -86,28 +86,6 @@ export default function EditProductForm({
       setCompatibility([...compatibility, customDevice.trim()]);
       setCustomDevice('');
     }
-  };
-
-  // Add image to list
-  const handleAddImage = (urlToAdd) => {
-    const targetUrl = urlToAdd || imageUrl;
-    if (!targetUrl.trim()) return;
-
-    if (targetUrl.startsWith('data:image/')) {
-      setError('Image data-URIs / binaries are not allowed. Please enter an image URL.');
-      return;
-    }
-
-    if (!images.includes(targetUrl.trim())) {
-      setImages([...images, targetUrl.trim()]);
-    }
-    setImageUrl('');
-    setError('');
-  };
-
-  // Remove image
-  const handleRemoveImage = (indexToRemove) => {
-    setImages(images.filter((_, idx) => idx !== indexToRemove));
   };
 
   // Add specification
@@ -489,75 +467,13 @@ export default function EditProductForm({
             )}
           </section>
 
-          {/* Card 3: Product Images */}
-          <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-4 shadow-xl">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-500" />
-              3. Product Images (URLs)
-            </h2>
-
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Paste image URL (https://...)"
-                className="flex-1 px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-              />
-              <button
-                type="button"
-                onClick={() => handleAddImage()}
-                className="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs sm:text-sm transition cursor-pointer flex-shrink-0"
-              >
-                + Add
-              </button>
-            </div>
-
-            {/* Quick Sample Image Presets */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] text-slate-400">Sample Photos:</span>
-              <button
-                type="button"
-                onClick={() => handleAddImage('https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80')}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:text-white border border-slate-700 cursor-pointer"
-              >
-                ⚡ Charger
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAddImage('https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=800&q=80')}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:text-white border border-slate-700 cursor-pointer"
-              >
-                📱 Phone Case
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAddImage('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80')}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:text-white border border-slate-700 cursor-pointer"
-              >
-                🔌 Cable
-              </button>
-            </div>
-
-            {/* Added Images Thumbnail Grid */}
-            {images.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-2">
-                {images.map((img, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-2xl bg-[#172032] overflow-hidden border border-slate-700 group">
-                    <img src={img} alt="Product preview" className="w-full h-full object-contain p-1" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-md cursor-pointer hover:bg-rose-500"
-                      title="Remove image"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+          {/* Card 3: Product Images (Up to 3, DigitalOcean Spaces) */}
+          <ProductImageUploader
+            images={images}
+            onChange={setImages}
+            maxImages={3}
+            disabled={loading}
+          />
 
           {/* Card 4: Device Compatibility & Specifications */}
           <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl">
