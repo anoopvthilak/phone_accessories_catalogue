@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { compressImage } from '@/lib/imageCompression.js';
 
 export default function ProductImageUploader({
   images = [],
@@ -23,7 +24,10 @@ export default function ProductImageUploader({
     if (!fileList || fileList.length === 0) return;
     setError('');
 
-    const filesToUpload = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
+    const filesToUpload = Array.from(fileList).filter((f) => {
+      return f && (f.type?.startsWith('image/') || /\.(jpe?g|png|webp|gif|avif)$/i.test(f.name || ''));
+    });
+
     if (filesToUpload.length === 0) {
       setError('Please select valid image files (JPG, PNG, WEBP, GIF, AVIF)');
       return;
@@ -39,25 +43,68 @@ export default function ProductImageUploader({
     }
 
     setIsUploading(true);
-    setUploadProgressText(`Uploading ${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''} to Spaces...`);
 
     try {
-      const formData = new FormData();
-      filesToUpload.forEach((f) => formData.append('files', f));
+      const uploadedUrls = [];
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const rawFile = filesToUpload[i];
+        const stepNum = i + 1;
+        const totalNum = filesToUpload.length;
+        const prefix = totalNum > 1 ? `Image ${stepNum} of ${totalNum}: ` : '';
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to upload image(s)');
+        // 1. Optimize mobile camera photos client-side (downscale to ~300KB-600KB)
+        // This solves Vercel's 4.5MB Serverless Function payload limit error on mobiles
+        setUploadProgressText(`${prefix}Optimizing photo for mobile upload...`);
+        let fileToUpload = rawFile;
+        try {
+          fileToUpload = await compressImage(rawFile);
+        } catch (compErr) {
+          console.warn('Compression fallback to original file:', compErr);
+          fileToUpload = rawFile;
+        }
+
+        const sizeKb = Math.round(fileToUpload.size / 1024);
+        const sizeLabel = sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`;
+
+        // 2. Upload individual file to Spaces
+        setUploadProgressText(`${prefix}Uploading to Spaces (${sizeLabel})...`);
+
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        // 3. Robust response parsing to avoid "Unexpected token 'R'..."
+        let data;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          const rawText = await res.text();
+          if (res.status === 413) {
+            throw new Error(`"${rawFile.name}" is too large for the server (Vercel 4.5MB limit). Please select a smaller photo.`);
+          }
+          throw new Error(rawText || `Upload failed with HTTP status ${res.status}`);
+        }
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || `Failed to upload "${rawFile.name}" to Spaces`);
+        }
+
+        const uploadedUrl = data.url || (data.urls && data.urls[0]);
+        if (uploadedUrl) {
+          uploadedUrls.push(uploadedUrl);
+        }
       }
 
-      const uploadedUrls = data.urls || (data.url ? [data.url] : []);
-      const newImages = [...images, ...uploadedUrls].slice(0, maxImages);
-      onChange(newImages);
+      if (uploadedUrls.length > 0) {
+        const newImages = [...images, ...uploadedUrls].slice(0, maxImages);
+        onChange(newImages);
+      }
     } catch (err) {
       console.error('Spaces upload error:', err);
       setError(err.message || 'Image upload failed. Please try again.');
@@ -222,7 +269,7 @@ export default function ProductImageUploader({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif,image/*"
             multiple={remainingSlots > 1}
             disabled={disabled || isUploading}
             onChange={(e) => handleUploadFiles(e.target.files)}
@@ -249,7 +296,7 @@ export default function ProductImageUploader({
                 or drag & drop images
               </p>
               <p className="text-xs text-slate-400">
-                Upload up to {remainingSlots} more image{remainingSlots === 1 ? '' : 's'} (PNG, JPG, WEBP, GIF up to 10MB)
+                Upload up to {remainingSlots} more image{remainingSlots === 1 ? '' : 's'} (Camera & gallery photos auto-optimized)
               </p>
               <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

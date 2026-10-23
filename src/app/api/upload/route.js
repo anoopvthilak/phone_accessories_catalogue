@@ -2,13 +2,19 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth.js';
 import { uploadToSpaces, deleteFromSpaces, isSpacesUrl } from '@/lib/spaces.js';
 
+export const maxDuration = 60;
+
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/jpg',
+  'image/pjpeg',
   'image/png',
+  'image/x-png',
   'image/webp',
   'image/gif',
   'image/avif',
+  'image/heic',
+  'image/heif',
 ]);
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per image
@@ -61,9 +67,20 @@ export async function POST(request) {
         continue;
       }
 
-      if (!ALLOWED_MIME_TYPES.has(file.type.toLowerCase())) {
+      let detectedType = (file.type || '').toLowerCase();
+      if (!detectedType || detectedType === 'application/octet-stream') {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (ext === 'jpg' || ext === 'jpeg') detectedType = 'image/jpeg';
+        else if (ext === 'png') detectedType = 'image/png';
+        else if (ext === 'webp') detectedType = 'image/webp';
+        else if (ext === 'gif') detectedType = 'image/gif';
+        else if (ext === 'avif') detectedType = 'image/avif';
+        else if (ext === 'heic') detectedType = 'image/heic';
+      }
+
+      if (!ALLOWED_MIME_TYPES.has(detectedType)) {
         return NextResponse.json(
-          { error: `Invalid file type "${file.type}". Allowed formats: JPG, PNG, WEBP, GIF, AVIF.` },
+          { error: `Invalid file type "${file.type || 'unknown'}". Allowed formats: JPG, PNG, WEBP, GIF, AVIF.` },
           { status: 400 }
         );
       }
@@ -78,7 +95,7 @@ export async function POST(request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const result = await uploadToSpaces(buffer, file.name, file.type);
+      const result = await uploadToSpaces(buffer, file.name, detectedType || file.type);
       uploadResults.push({
         url: result.url,
         key: result.key,
