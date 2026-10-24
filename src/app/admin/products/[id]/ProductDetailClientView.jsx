@@ -159,7 +159,7 @@ export default function ProductDetailClientView({ product, user }) {
           <div className="p-5 rounded-2xl bg-[#161f30] border border-slate-700/60 flex items-center justify-between flex-wrap gap-4">
             <div>
               <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold block">
-                Store Retail Price
+                MOP (Maximum offer price)
               </span>
               <div className="flex items-baseline gap-3 mt-1">
                 <span className="text-3xl sm:text-4xl font-black text-white">

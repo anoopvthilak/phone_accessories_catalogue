@@ -231,7 +231,7 @@ export default function ProductDetailModal({
               <div className="p-4 rounded-2xl bg-[#161e2e] border border-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-xs text-slate-400 block font-medium">
-                    Retail Price
+                    MOP (Maximum offer price)
                   </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
                     <span className="text-2xl sm:text-3xl font-black text-white">

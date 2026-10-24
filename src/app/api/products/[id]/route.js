@@ -7,6 +7,44 @@ import Brand from '@/models/Brand.js';
 import { getSession } from '@/lib/auth.js';
 import { deleteFromSpaces, isSpacesUrl } from '@/lib/spaces.js';
 
+async function resolveBrand(brandInput) {
+  if (!brandInput || typeof brandInput !== 'string') return null;
+  const trimmed = brandInput.trim();
+  if (!trimmed) return null;
+
+  // Check if it's a valid 24-char ObjectId
+  if (mongoose.Types.ObjectId.isValid(trimmed) && String(new mongoose.Types.ObjectId(trimmed)) === trimmed) {
+    const byId = await Brand.findById(trimmed);
+    if (byId) return byId;
+  }
+
+  // Look up case-insensitively by name
+  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let brandDoc = await Brand.findOne({
+    name: { $regex: new RegExp(`^${escaped}$`, 'i') },
+  });
+
+  if (!brandDoc) {
+    let baseSlug = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '') || 'brand';
+    let slug = baseSlug;
+    let counter = 1;
+    while (await Brand.findOne({ slug })) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    brandDoc = await Brand.create({
+      name: trimmed,
+      slug,
+      isActive: true,
+    });
+  }
+
+  return brandDoc;
+}
+
 // GET: Fetch product details by ID
 export async function GET(request, { params }) {
   try {
@@ -79,6 +117,8 @@ export async function PUT(request, { params }) {
       name,
       categoryId,
       brandId,
+      brandName,
+      brand,
       sku,
       price,
       mrp,
@@ -108,7 +148,8 @@ export async function PUT(request, { params }) {
       );
     }
 
-    if (!brandId) {
+    const brandInput = (brandName || brand || brandId || '').toString().trim();
+    if (!brandInput) {
       return NextResponse.json(
         { error: 'Product brand is required' },
         { status: 400 }
@@ -118,7 +159,7 @@ export async function PUT(request, { params }) {
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice) || parsedPrice < 0) {
       return NextResponse.json(
-        { error: 'Selling price must be a valid positive number' },
+        { error: 'MOP (selling price) must be a valid positive number' },
         { status: 400 }
       );
     }
@@ -126,7 +167,7 @@ export async function PUT(request, { params }) {
     const parsedMrp = parseFloat(mrp);
     if (isNaN(parsedMrp) || parsedMrp < parsedPrice) {
       return NextResponse.json(
-        { error: 'MRP must be greater than or equal to selling price' },
+        { error: 'MRP must be greater than or equal to MOP' },
         { status: 400 }
       );
     }
@@ -151,17 +192,17 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Look up brand
-    const brandDoc = await Brand.findById(brandId);
+    // Look up or auto-create brand
+    const brandDoc = await resolveBrand(brandInput);
     if (!brandDoc) {
       return NextResponse.json(
-        { error: 'Selected brand does not exist' },
+        { error: 'Failed to resolve or create brand' },
         { status: 400 }
       );
     }
 
     // Validate SKU uniqueness (excluding this product)
-    const normalizedSku = (sku || existingProduct.sku).trim().toUpperCase();
+    const normalizedSku = (typeof sku === 'string' && sku.trim() ? sku.trim().toUpperCase() : existingProduct.sku);
     const skuConflict = await Product.findOne({
       sku: normalizedSku,
       _id: { $ne: id },

@@ -106,6 +106,22 @@ export default function WarrantyClaimSlipModal({
               </div>
             )}
 
+            {warranty.billAmount !== null && warranty.billAmount !== undefined && warranty.billAmount !== '' && (
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Bill Amount:</span>
+                <span className="font-semibold text-indigo-700">
+                  ₹{Number(warranty.billAmount).toLocaleString('en-IN')}
+                </span>
+              </div>
+            )}
+
+            {warranty.replacedItem && (
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Replaced Item:</span>
+                <span className="font-semibold text-emerald-700">{warranty.replacedItem}</span>
+              </div>
+            )}
+
             <div className="py-1">
               <span className="text-slate-500 block mb-1">Reported Issue / Defect:</span>
               <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-medium">

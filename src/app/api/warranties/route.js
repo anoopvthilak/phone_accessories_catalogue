@@ -33,6 +33,7 @@ export async function GET(request) {
         { customerName: { $regex: escaped, $options: 'i' } },
         { serialNumber: { $regex: escaped, $options: 'i' } },
         { billNumber: { $regex: escaped, $options: 'i' } },
+        { replacedItem: { $regex: escaped, $options: 'i' } },
         { productName: { $regex: escaped, $options: 'i' } },
         { brandName: { $regex: escaped, $options: 'i' } },
       ];
@@ -114,12 +115,14 @@ export async function POST(request) {
       categoryName,
       serialNumber,
       billNumber,
+      billAmount,
       purchaseDate,
       warrantyType,
       issueDescription,
       physicalCondition,
       accessoriesIncluded,
       serviceCenterName,
+      replacedItem,
     } = body;
 
     if (!customerName || !customerName.trim()) {
@@ -168,12 +171,16 @@ export async function POST(request) {
       categoryName: categoryName?.trim() || 'General Accessories',
       serialNumber: serialNumber ? serialNumber.trim() : '',
       billNumber: billNumber ? billNumber.trim() : '',
+      billAmount: billAmount !== undefined && billAmount !== '' && billAmount !== null && !isNaN(Number(billAmount))
+        ? Number(billAmount)
+        : null,
       purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
       warrantyType: warrantyType || 'Brand Warranty',
       issueDescription: issueDescription.trim(),
       physicalCondition: physicalCondition?.trim() || 'Normal store intake condition',
       accessoriesIncluded: accessoriesIncluded?.trim() || 'Item only',
       serviceCenterName: serviceCenterName ? serviceCenterName.trim() : '',
+      replacedItem: replacedItem ? replacedItem.trim() : '',
       status: 'RECEIVED_AT_SHOP',
       receivedBy: employeeName,
       statusHistory: [

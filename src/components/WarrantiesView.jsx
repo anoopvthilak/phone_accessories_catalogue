@@ -99,7 +99,36 @@ export default function WarrantiesView({ initialUser }) {
   const [statusNote, setStatusNote] = useState('');
   const [serviceCenterName, setServiceCenterName] = useState('');
   const [serviceCenterRmaNo, setServiceCenterRmaNo] = useState('');
+  const [replacedItem, setReplacedItem] = useState('');
+  const [replacedItemResults, setReplacedItemResults] = useState([]);
+  const [replacedItemSearching, setReplacedItemSearching] = useState(false);
+  const [showReplacedDropdown, setShowReplacedDropdown] = useState(false);
   const [updating, setUpdating] = useState(false);
+
+  // Search catalogue for replaced item in status update modal
+  useEffect(() => {
+    const query = replacedItem?.trim();
+    if (!statusModalItem || !query || query.length < 2) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setReplacedItemSearching(true);
+        const res = await fetch(`/api/products?search=${encodeURIComponent(query)}&limit=5`);
+        if (res.ok) {
+          const data = await res.json();
+          setReplacedItemResults(data.products || []);
+        }
+      } catch (err) {
+        console.error('Error searching replacement products:', err);
+      } finally {
+        setReplacedItemSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [replacedItem, statusModalItem]);
 
   const fetchWarranties = useCallback(async () => {
     try {
@@ -141,6 +170,9 @@ export default function WarrantiesView({ initialUser }) {
     setStatusNote('');
     setServiceCenterName(item.serviceCenterName || '');
     setServiceCenterRmaNo(item.serviceCenterRmaNo || '');
+    setReplacedItem(item.replacedItem || '');
+    setReplacedItemResults([]);
+    setShowReplacedDropdown(false);
   };
 
   const handleUpdateStatus = async (e) => {
@@ -157,6 +189,7 @@ export default function WarrantiesView({ initialUser }) {
           statusNote: statusNote.trim(),
           serviceCenterName: serviceCenterName.trim(),
           serviceCenterRmaNo: serviceCenterRmaNo.trim(),
+          replacedItem: replacedItem.trim(),
         }),
       });
 
@@ -423,13 +456,33 @@ export default function WarrantiesView({ initialUser }) {
                           {item.customerPhone}
                         </a>
                       </div>
-                      {item.billNumber && (
+                      {(item.billNumber || item.billAmount !== null && item.billAmount !== undefined) && (
                         <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800/60">
                           <span className="text-slate-400">Bill Ref:</span>
-                          <span className="text-slate-300 font-mono">{item.billNumber}</span>
+                          <span className="text-slate-300 font-mono">
+                            {item.billNumber || '—'}
+                            {item.billAmount !== null && item.billAmount !== undefined && (
+                              <span className="text-indigo-400 font-semibold ml-1.5">
+                                (₹{Number(item.billAmount).toLocaleString('en-IN')})
+                              </span>
+                            )}
+                          </span>
                         </div>
                       )}
                     </div>
+
+                    {/* Replaced Item Banner if available */}
+                    {item.replacedItem && (
+                      <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs mb-3 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] uppercase font-bold text-emerald-400">
+                            Replaced Unit / Item:
+                          </div>
+                          <span className="font-semibold text-slate-200">{item.replacedItem}</span>
+                        </div>
+                        <span className="text-xs">🔄</span>
+                      </div>
+                    )}
 
                     {/* Reported Issue */}
                     <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs mb-3">
@@ -630,6 +683,94 @@ export default function WarrantiesView({ initialUser }) {
               </div>
             </div>
 
+            {/* Replaced Item / Replacement Unit */}
+            <div className="relative">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] text-slate-300">
+                  Replaced Item / Replacement Unit <span className="text-slate-500 font-normal">(Optional)</span>
+                </label>
+                <span className="text-[10px] text-indigo-400 font-medium">Search catalogue</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={replacedItem}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setReplacedItem(val);
+                    if (!val || val.trim().length < 2) {
+                      setReplacedItemResults([]);
+                    }
+                    setShowReplacedDropdown(true);
+                  }}
+                  onFocus={() => {
+                    if (replacedItemResults.length > 0) setShowReplacedDropdown(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowReplacedDropdown(false), 200);
+                  }}
+                  placeholder="Type to search catalogue or enter custom replacement item..."
+                  className="w-full bg-[#141b2a] border border-slate-800 rounded-xl px-3 py-1.5 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+
+                {replacedItemSearching && (
+                  <div className="absolute right-2.5 top-2 text-slate-400">
+                    <svg className="w-3.5 h-3.5 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  </div>
+                )}
+
+                {!replacedItemSearching && replacedItem && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplacedItem('');
+                      setReplacedItemResults([]);
+                      setShowReplacedDropdown(false);
+                    }}
+                    className="absolute right-2 top-1.5 text-slate-400 hover:text-white text-xs p-0.5"
+                    title="Clear"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Dropdown Suggestions */}
+              {showReplacedDropdown && replacedItemResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[#121826] border border-slate-700 rounded-xl shadow-2xl z-30 overflow-hidden divide-y divide-slate-800 max-h-40 overflow-y-auto">
+                  {replacedItemResults.map((prod) => (
+                    <div
+                      key={prod._id}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setReplacedItem(`${prod.name}${prod.brandName ? ` (${prod.brandName})` : ''}`);
+                        setShowReplacedDropdown(false);
+                        setReplacedItemResults([]);
+                      }}
+                      className="p-2 hover:bg-indigo-600/15 cursor-pointer flex items-center justify-between text-xs"
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="font-semibold text-white truncate">{prod.name}</div>
+                        <div className="text-[10px] text-slate-400">{prod.brandName} • SKU: {prod.sku}</div>
+                      </div>
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                          prod.stock > 0
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                        }`}
+                      >
+                        {prod.stock > 0 ? `Stock: ${prod.stock}` : 'Out of Stock'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Note */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -720,6 +861,34 @@ export default function WarrantiesView({ initialUser }) {
                   </div>
                 </div>
               </div>
+
+              {/* Bill & Replacement Details */}
+              {(selectedWarranty.billNumber || selectedWarranty.billAmount !== null && selectedWarranty.billAmount !== undefined || selectedWarranty.replacedItem || selectedWarranty.warrantyType) && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-2xl bg-[#141b2a] border border-slate-800">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Warranty Type</span>
+                    <span className="text-slate-200 font-semibold">{selectedWarranty.warrantyType || 'Brand Warranty'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Bill Number</span>
+                    <span className="font-mono text-slate-300">{selectedWarranty.billNumber || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Bill Amount</span>
+                    <span className="text-indigo-400 font-bold">
+                      {selectedWarranty.billAmount !== null && selectedWarranty.billAmount !== undefined
+                        ? `₹${Number(selectedWarranty.billAmount).toLocaleString('en-IN')}`
+                        : '—'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Replaced Item</span>
+                    <span className="text-emerald-400 font-medium truncate block" title={selectedWarranty.replacedItem}>
+                      {selectedWarranty.replacedItem || '—'}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Defect & Condition */}
               <div className="p-3.5 rounded-2xl bg-[#141b2a] border border-slate-800 space-y-2">

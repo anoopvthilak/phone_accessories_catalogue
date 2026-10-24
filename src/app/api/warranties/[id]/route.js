@@ -94,6 +94,12 @@ export async function PUT(request, { params }) {
     if (body.categoryName !== undefined) warranty.categoryName = body.categoryName.trim();
     if (body.serialNumber !== undefined) warranty.serialNumber = body.serialNumber.trim();
     if (body.billNumber !== undefined) warranty.billNumber = body.billNumber.trim();
+    if (body.billAmount !== undefined) {
+      warranty.billAmount = body.billAmount !== '' && body.billAmount !== null && !isNaN(Number(body.billAmount))
+        ? Number(body.billAmount)
+        : null;
+    }
+    if (body.replacedItem !== undefined) warranty.replacedItem = body.replacedItem.trim();
     if (body.serviceCenterName !== undefined) warranty.serviceCenterName = body.serviceCenterName.trim();
     if (body.serviceCenterRmaNo !== undefined) warranty.serviceCenterRmaNo = body.serviceCenterRmaNo.trim();
     if (body.resolutionNotes !== undefined) warranty.resolutionNotes = body.resolutionNotes.trim();

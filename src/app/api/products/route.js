@@ -1,9 +1,48 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb.js';
 import Product from '@/models/Product.js';
 import Category from '@/models/Category.js';
 import Brand from '@/models/Brand.js';
 import { getSession } from '@/lib/auth.js';
+
+async function resolveBrand(brandInput) {
+  if (!brandInput || typeof brandInput !== 'string') return null;
+  const trimmed = brandInput.trim();
+  if (!trimmed) return null;
+
+  // Check if it's a valid 24-char ObjectId
+  if (mongoose.Types.ObjectId.isValid(trimmed) && String(new mongoose.Types.ObjectId(trimmed)) === trimmed) {
+    const byId = await Brand.findById(trimmed);
+    if (byId) return byId;
+  }
+
+  // Look up case-insensitively by name
+  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let brandDoc = await Brand.findOne({
+    name: { $regex: new RegExp(`^${escaped}$`, 'i') },
+  });
+
+  if (!brandDoc) {
+    let baseSlug = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '') || 'brand';
+    let slug = baseSlug;
+    let counter = 1;
+    while (await Brand.findOne({ slug })) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    brandDoc = await Brand.create({
+      name: trimmed,
+      slug,
+      isActive: true,
+    });
+  }
+
+  return brandDoc;
+}
 
 export async function GET(request) {
   try {
@@ -135,6 +174,8 @@ export async function POST(request) {
       name,
       categoryId,
       brandId,
+      brandName,
+      brand,
       sku,
       price,
       mrp,
@@ -163,7 +204,8 @@ export async function POST(request) {
       );
     }
 
-    if (!brandId) {
+    const brandInput = (brandName || brand || brandId || '').toString().trim();
+    if (!brandInput) {
       return NextResponse.json(
         { error: 'Product brand is required' },
         { status: 400 }
@@ -173,7 +215,7 @@ export async function POST(request) {
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice) || parsedPrice < 0) {
       return NextResponse.json(
-        { error: 'Selling price must be a valid positive number' },
+        { error: 'MOP (selling price) must be a valid positive number' },
         { status: 400 }
       );
     }
@@ -181,7 +223,7 @@ export async function POST(request) {
     const parsedMrp = parseFloat(mrp);
     if (isNaN(parsedMrp) || parsedMrp < parsedPrice) {
       return NextResponse.json(
-        { error: 'MRP must be greater than or equal to selling price' },
+        { error: 'MRP must be greater than or equal to MOP' },
         { status: 400 }
       );
     }
@@ -201,25 +243,41 @@ export async function POST(request) {
       );
     }
 
-    // Look up brand
-    const brandDoc = await Brand.findById(brandId);
+    // Look up or auto-create brand
+    const brandDoc = await resolveBrand(brandInput);
     if (!brandDoc) {
       return NextResponse.json(
-        { error: 'Selected brand does not exist' },
+        { error: 'Failed to resolve or create brand' },
         { status: 400 }
       );
     }
 
-    // Clean & normalize SKU
-    const normalizedSku = (sku || `${brandDoc.name.slice(0, 3)}-${Date.now().toString(36)}`).trim().toUpperCase();
-
-    // Check SKU uniqueness
-    const existingSku = await Product.findOne({ sku: normalizedSku });
-    if (existingSku) {
-      return NextResponse.json(
-        { error: `SKU "${normalizedSku}" is already in use by another product` },
-        { status: 400 }
-      );
+    // Clean & normalize SKU or auto-generate unique SKU if omitted
+    let normalizedSku = typeof sku === 'string' && sku.trim() ? sku.trim().toUpperCase() : '';
+    if (!normalizedSku) {
+      const brandPrefix = (brandDoc.name || 'ACC')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, 3)
+        .toUpperCase() || 'ACC';
+      let candidate = '';
+      let isUnique = false;
+      while (!isUnique) {
+        const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+        candidate = `${brandPrefix}-${Date.now().toString().slice(-4)}-${rand}`;
+        const conflict = await Product.findOne({ sku: candidate });
+        if (!conflict) {
+          isUnique = true;
+        }
+      }
+      normalizedSku = candidate;
+    } else {
+      const existingSku = await Product.findOne({ sku: normalizedSku });
+      if (existingSku) {
+        return NextResponse.json(
+          { error: `SKU "${normalizedSku}" is already in use by another product` },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate images (strictly reject data-URI / binary buffers, max 3 images)

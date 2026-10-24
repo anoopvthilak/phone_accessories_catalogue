@@ -19,10 +19,11 @@ export default function EditProductForm({
   const [categoryId, setCategoryId] = useState(
     initialProduct.category || (initialCategories[0]?._id ?? '')
   );
-  const [brandId, setBrandId] = useState(
-    initialProduct.brand || (initialBrands[0]?._id ?? '')
+  const [brandName, setBrandName] = useState(
+    initialProduct.brandName ||
+    initialBrands.find((b) => b._id === initialProduct.brand)?.name ||
+    ''
   );
-  const [sku, setSku] = useState(initialProduct.sku || '');
   const [price, setPrice] = useState(initialProduct.price?.toString() || '');
   const [mrp, setMrp] = useState(initialProduct.mrp?.toString() || '');
   const [inStock, setInStock] = useState(initialProduct.inStock !== false && initialProduct.status !== 'OUT_OF_STOCK');
@@ -42,33 +43,7 @@ export default function EditProductForm({
   const [success, setSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Quick preset compatibility tags for mobile thumbs
-  const POPULAR_DEVICES = [
-    'iPhone 16 Pro',
-    'iPhone 16',
-    'iPhone 15 Pro',
-    'iPhone 15',
-    'Galaxy S24 Ultra',
-    'Galaxy S24',
-    'OnePlus 12',
-    'Pixel 9 Pro',
-    'Universal USB-C',
-    'MagSafe Compatible',
-  ];
-
-  // Quick preset spec keys for mobile thumbs
-  const QUICK_SPEC_KEYS = ['Output Wattage', 'Cable Length', 'Material', 'Color', 'Battery Life', 'Protocol'];
-
   const canDelete = user?.role === 'ADMIN';
-
-  // Auto-generate SKU
-  const handleGenerateSku = () => {
-    const selectedBrand = initialBrands.find((b) => b._id === brandId)?.name || 'ACC';
-    const brandPrefix = selectedBrand.slice(0, 3).toUpperCase();
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const generated = `${brandPrefix}-${Date.now().toString().slice(-4)}-${randomSuffix}`;
-    setSku(generated);
-  };
 
   // Toggle compatibility tag
   const toggleCompatibility = (device) => {
@@ -119,8 +94,14 @@ export default function EditProductForm({
       return;
     }
 
+    if (!brandName.trim()) {
+      setError('Product brand is required');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (!price || parseFloat(price) < 0) {
-      setError('Please enter a valid retail price');
+      setError('Please enter a valid MOP (Maximum offer price)');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -129,7 +110,7 @@ export default function EditProductForm({
     const numMrp = mrp ? parseFloat(mrp) : numPrice;
 
     if (numMrp < numPrice) {
-      setError('MRP cannot be lower than the selling price');
+      setError('MRP cannot be lower than the MOP (selling price)');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -148,8 +129,8 @@ export default function EditProductForm({
         body: JSON.stringify({
           name: name.trim(),
           categoryId,
-          brandId,
-          sku: sku.trim(),
+          brand: brandName.trim(),
+          brandName: brandName.trim(),
           price: numPrice,
           mrp: numMrp,
           inStock: inStock,
@@ -307,42 +288,21 @@ export default function EditProductForm({
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Brand *
                 </label>
-                <select
-                  value={brandId}
-                  onChange={(e) => setBrandId(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
-                >
+                <input
+                  type="text"
+                  required
+                  list="brand-options"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  placeholder="e.g. Anker, Apple, boAt..."
+                  className="w-full px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+                <datalist id="brand-options">
                   {initialBrands.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.name}
-                    </option>
+                    <option key={b._id} value={b.name} />
                   ))}
-                </select>
+                </datalist>
               </div>
-            </div>
-
-            {/* SKU */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-semibold text-slate-300">
-                  SKU (Stock Keeping Unit) *
-                </label>
-                <button
-                  type="button"
-                  onClick={handleGenerateSku}
-                  className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-                >
-                  ⚡ Regenerate SKU
-                </button>
-              </div>
-              <input
-                type="text"
-                required
-                value={sku}
-                onChange={(e) => setSku(e.target.value.toUpperCase())}
-                placeholder="e.g. ANK-67W-BLK"
-                className="w-full px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-slate-100 placeholder-slate-500 text-sm uppercase font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
             </div>
           </section>
 
@@ -356,7 +316,7 @@ export default function EditProductForm({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  Retail Price (₹) *
+                  MOP (Maximum offer price) (₹) *
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-bold">
@@ -459,7 +419,7 @@ export default function EditProductForm({
             {/* Discount Preview */}
             {price && mrp && parseFloat(mrp) > parseFloat(price) && (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
-                <span>Calculated Retail Discount:</span>
+                <span>Calculated MOP Discount:</span>
                 <strong className="font-bold">
                   {Math.round(((parseFloat(mrp) - parseFloat(price)) / parseFloat(mrp)) * 100)}% OFF
                 </strong>
@@ -485,36 +445,22 @@ export default function EditProductForm({
             {/* Device Compatibility */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-2">
-                Device Compatibility (Tap to toggle)
+                Device Compatibility
               </label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {POPULAR_DEVICES.map((device) => {
-                  const isChecked = compatibility.includes(device);
-                  return (
-                    <button
-                      key={device}
-                      type="button"
-                      onClick={() => toggleCompatibility(device)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold'
-                          : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
-                      }`}
-                    >
-                      {isChecked ? '✓ ' : '+ '}
-                      {device}
-                    </button>
-                  );
-                })}
-              </div>
 
               {/* Custom Device Input */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-3">
                 <input
                   type="text"
                   value={customDevice}
                   onChange={(e) => setCustomDevice(e.target.value)}
-                  placeholder="Other model (e.g. iPad Air M2)"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomDevice(e);
+                    }
+                  }}
+                  placeholder="Enter model name (e.g. iPhone 16 Pro, Galaxy S24, Universal USB-C)"
                   className="flex-1 px-4 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
                 />
                 <button
@@ -525,6 +471,30 @@ export default function EditProductForm({
                   Add Model
                 </button>
               </div>
+
+              {/* Active Compatibility List */}
+              {compatibility.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {compatibility.map((device) => (
+                    <div
+                      key={device}
+                      className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2 font-medium"
+                    >
+                      <span>{device}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleCompatibility(device)}
+                        className="text-amber-400/70 hover:text-amber-200 font-bold ml-1 cursor-pointer"
+                        title="Remove device"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">No device models added yet.</p>
+              )}
             </div>
 
             {/* Specifications Key-Value Pairs */}
@@ -533,26 +503,12 @@ export default function EditProductForm({
                 Specifications
               </label>
 
-              {/* Quick Spec Presets */}
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {QUICK_SPEC_KEYS.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    onClick={() => setSpecKey(k)}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-400 hover:text-slate-200 border border-slate-700 cursor-pointer"
-                  >
-                    + {k}
-                  </button>
-                ))}
-              </div>
-
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <input
                   type="text"
                   value={specKey}
                   onChange={(e) => setSpecKey(e.target.value)}
-                  placeholder="Feature (e.g. Wattage)"
+                  placeholder="Feature (e.g. Wattage, Material, Cable Length)"
                   className="px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="flex gap-2">
@@ -560,7 +516,13 @@ export default function EditProductForm({
                     type="text"
                     value={specVal}
                     onChange={(e) => setSpecVal(e.target.value)}
-                    placeholder="Value (e.g. 65W)"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddSpec();
+                      }
+                    }}
+                    placeholder="Value (e.g. 65W, Braided Nylon, 1.8m)"
                     className="flex-1 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button

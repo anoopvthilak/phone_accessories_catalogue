@@ -61,6 +61,10 @@ const WarrantyClaimSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    billAmount: {
+      type: Number,
+      default: null,
+    },
     purchaseDate: {
       type: Date,
       default: null,
@@ -116,6 +120,11 @@ const WarrantyClaimSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    replacedItem: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     resolutionNotes: {
       type: String,
       trim: true,
@@ -163,5 +172,10 @@ const WarrantyClaimSchema = new mongoose.Schema(
 WarrantyClaimSchema.index({ customerPhone: 1, status: 1 });
 WarrantyClaimSchema.index({ status: 1, createdAt: -1 });
 WarrantyClaimSchema.index({ createdAt: -1 });
+
+// In development, ensure schema changes are immediately picked up
+if (process.env.NODE_ENV !== 'production' && mongoose.models.WarrantyClaim) {
+  delete mongoose.models.WarrantyClaim;
+}
 
 export default mongoose.models.WarrantyClaim || mongoose.model('WarrantyClaim', WarrantyClaimSchema);

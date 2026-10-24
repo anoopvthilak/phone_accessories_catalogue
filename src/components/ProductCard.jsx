@@ -62,7 +62,7 @@ export default function ProductCard({ product, onSelect }) {
         </div>
 
         {/* Favorite / Quick Action Heart Button matching reference UI */}
-        <button
+        {/* <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
@@ -88,21 +88,19 @@ export default function ProductCard({ product, onSelect }) {
               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
             />
           </svg>
-        </button>
+        </button> */}
 
         {/* Stock Badge on bottom-left */}
         <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
           <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md ${
-              isInStock
-                ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
-                : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
-            }`}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md ${isInStock
+              ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
+              : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
+              }`}
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isInStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-              }`}
+              className={`w-1.5 h-1.5 rounded-full ${isInStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                }`}
             />
             {isInStock ? `In Stock (${product.stock})` : 'Out of Stock'}
           </span>
@@ -132,9 +130,9 @@ export default function ProductCard({ product, onSelect }) {
           {/* Category & SKU Subtitle */}
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
             <span>{product.categoryName}</span>
-            <span className="font-mono text-[10px] text-slate-500">
+            {/* <span className="font-mono text-[10px] text-slate-500">
               SKU: {product.sku}
-            </span>
+            </span> */}
           </div>
 
           {/* Product Name */}
@@ -156,7 +154,7 @@ export default function ProductCard({ product, onSelect }) {
         <div className="pt-3 border-t border-slate-800/80 flex items-end justify-between">
           <div>
             <div className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-              Retail Price
+              MOP
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-lg sm:text-xl font-extrabold text-white">
