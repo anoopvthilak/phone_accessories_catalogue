@@ -16,6 +16,7 @@ export default function ProductImageUploader({
   const [customUrl, setCustomUrl] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const remainingSlots = Math.max(0, maxImages - images.length);
 
@@ -112,6 +113,9 @@ export default function ProductImageUploader({
       setUploadProgressText('');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
+      }
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = '';
       }
     }
   };
@@ -258,11 +262,12 @@ export default function ProductImageUploader({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${isDragOver
+          className={`relative border-2 border-dashed rounded-2xl p-5 sm:p-7 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${isDragOver
               ? 'border-purple-500 bg-purple-500/10 scale-[1.01]'
               : 'border-slate-700 hover:border-purple-500/70 bg-[#151d2d]/60 hover:bg-[#182236]'
             } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
         >
+          {/* File Picker / Gallery Input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -273,26 +278,83 @@ export default function ProductImageUploader({
             className="hidden"
           />
 
+          {/* Direct Camera Capture Input for Mobile Smartphones */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            disabled={disabled || isUploading}
+            onChange={(e) => handleUploadFiles(e.target.files)}
+            className="hidden"
+          />
+
           {isUploading ? (
-            <div className="flex flex-col items-center gap-3 py-2">
-              <div className="w-9 h-9 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+            <div className="flex flex-col items-center gap-3 py-3">
+              <div className="w-10 h-10 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
               <p className="text-sm font-medium text-purple-300">{uploadProgressText}</p>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 mb-1 group-hover:scale-110 transition">
+            <div className="flex flex-col items-center gap-3 w-full max-w-md">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 mb-0.5">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-slate-200">
-                <span className="text-purple-400 underline decoration-purple-400/50 underline-offset-2">
-                  Click to browse
-                </span>{' '}
-                or drag & drop images
-              </p>
-              <p className="text-xs text-slate-400">
-                Upload up to {remainingSlots} more image{remainingSlots === 1 ? '' : 's'} (Camera & gallery photos auto-optimized)
+
+              <div>
+                <p className="text-sm font-bold text-slate-200">
+                  Upload Product Photos
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Up to {remainingSlots} more image{remainingSlots === 1 ? '' : 's'} (Camera & gallery photos auto-optimized)
+                </p>
+              </div>
+
+              {/* Dedicated Camera & Gallery Buttons for Mobile and Desktop */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 w-full max-w-xs pt-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isUploading) {
+                      if (cameraInputRef.current) cameraInputRef.current.value = '';
+                      cameraInputRef.current?.click();
+                    }
+                  }}
+                  disabled={disabled || isUploading}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 cursor-pointer disabled:opacity-50"
+                  title="Open camera to capture product photo directly"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Open Camera</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isUploading) {
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  disabled={disabled || isUploading}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-slate-200 hover:text-white text-xs font-bold transition border border-slate-700/80 flex items-center justify-center gap-2 shadow cursor-pointer disabled:opacity-50"
+                  title="Choose existing photos from device gallery"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>From Gallery</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-500 hidden sm:block">
+                or drag & drop image files directly here
               </p>
             </div>
           )}
