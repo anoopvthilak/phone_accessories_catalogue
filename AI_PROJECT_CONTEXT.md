@@ -45,7 +45,6 @@ A product contains:
 - name
 - category
 - brand
-- SKU
 - price
 - MRP
 - images

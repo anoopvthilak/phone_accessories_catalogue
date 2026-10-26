@@ -41,7 +41,7 @@ export async function GET(request) {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('product', 'name price images inStock stock sku')
+        .populate('product', 'name price images inStock stock')
         .lean(),
       Enquiry.countDocuments(query),
       Enquiry.aggregate([

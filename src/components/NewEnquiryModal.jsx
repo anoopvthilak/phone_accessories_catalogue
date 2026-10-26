@@ -209,11 +209,10 @@ export default function NewEnquiryModal({
               <button
                 type="button"
                 onClick={() => setProductMode('CATALOGUE')}
-                className={`py-2 text-xs font-semibold rounded-xl transition ${
-                  productMode === 'CATALOGUE'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`py-2 text-xs font-semibold rounded-xl transition ${productMode === 'CATALOGUE'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 Catalogue Item (Out of Stock)
               </button>
@@ -223,11 +222,10 @@ export default function NewEnquiryModal({
                   setProductMode('CUSTOM');
                   setSelectedProduct(null);
                 }}
-                className={`py-2 text-xs font-semibold rounded-xl transition ${
-                  productMode === 'CUSTOM'
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`py-2 text-xs font-semibold rounded-xl transition ${productMode === 'CUSTOM'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 New / Custom Accessory
               </button>
@@ -260,7 +258,7 @@ export default function NewEnquiryModal({
                         {selectedProduct.name}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        {selectedProduct.brandName} • SKU: {selectedProduct.sku} • ₹{selectedProduct.price}
+                        {selectedProduct.brandName} • ₹{selectedProduct.price}
                       </div>
                     </div>
                   </div>
@@ -278,7 +276,7 @@ export default function NewEnquiryModal({
                     type="text"
                     value={catalogSearch}
                     onChange={(e) => setCatalogSearch(e.target.value)}
-                    placeholder="Search by accessory title or SKU..."
+                    placeholder="Search by accessory title..."
                     className="w-full bg-[#141b2b] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
                   />
                   {searching && (
@@ -302,11 +300,10 @@ export default function NewEnquiryModal({
                             </div>
                           </div>
                           <span
-                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                              prod.inStock
-                                ? 'bg-emerald-500/15 text-emerald-400'
-                                : 'bg-rose-500/15 text-rose-400'
-                            }`}
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${prod.inStock
+                              ? 'bg-emerald-500/15 text-emerald-400'
+                              : 'bg-rose-500/15 text-rose-400'
+                              }`}
                           >
                             {prod.inStock ? 'In Stock' : 'Out of Stock'}
                           </span>

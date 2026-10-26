@@ -73,9 +73,7 @@ export default function DeleteConfirmModal({
 
         {/* Product Details Mini Preview */}
         <div className="p-3.5 rounded-2xl bg-[#182234] border border-slate-700/60">
-          <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-1">
-            SKU: <span className="text-blue-400 font-bold">{product.sku}</span>
-          </div>
+
           <div className="text-sm font-bold text-white line-clamp-2">
             {product.name}
           </div>

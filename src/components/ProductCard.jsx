@@ -127,12 +127,9 @@ export default function ProductCard({ product, onSelect }) {
       {/* Card Content */}
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          {/* Category & SKU Subtitle */}
+          {/* Category Subtitle */}
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
             <span>{product.categoryName}</span>
-            {/* <span className="font-mono text-[10px] text-slate-500">
-              SKU: {product.sku}
-            </span> */}
           </div>
 
           {/* Product Name */}

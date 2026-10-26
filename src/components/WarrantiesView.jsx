@@ -312,11 +312,10 @@ export default function WarrantiesView({ initialUser }) {
           <button
             type="button"
             onClick={() => setActiveStatus('ALL')}
-            className={`p-3 rounded-2xl border text-left transition ${
-              activeStatus === 'ALL'
+            className={`p-3 rounded-2xl border text-left transition ${activeStatus === 'ALL'
                 ? 'bg-[#161f33] border-indigo-500/50 shadow-md shadow-indigo-500/10'
                 : 'bg-[#0f1422] border-slate-800/80 hover:border-slate-700 text-slate-400'
-            }`}
+              }`}
           >
             <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
               All Tickets
@@ -334,11 +333,10 @@ export default function WarrantiesView({ initialUser }) {
                 key={st}
                 type="button"
                 onClick={() => setActiveStatus(st)}
-                className={`p-3 rounded-2xl border text-left transition ${
-                  isActive
+                className={`p-3 rounded-2xl border text-left transition ${isActive
                     ? 'bg-[#161f33] border-indigo-500/50 shadow-md shadow-indigo-500/10'
                     : 'bg-[#0f1422] border-slate-800/80 hover:border-slate-700 text-slate-400'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 line-clamp-1">
@@ -393,11 +391,10 @@ export default function WarrantiesView({ initialUser }) {
               return (
                 <div
                   key={item._id}
-                  className={`bg-[#0f1523] border rounded-3xl p-4 sm:p-5 flex flex-col justify-between transition-all shadow-xl shadow-black/40 group relative ${
-                    hasExactCallSearch
+                  className={`bg-[#0f1523] border rounded-3xl p-4 sm:p-5 flex flex-col justify-between transition-all shadow-xl shadow-black/40 group relative ${hasExactCallSearch
                       ? 'border-indigo-500/60 ring-2 ring-indigo-500/20'
                       : 'border-slate-800/90 hover:border-slate-700'
-                  }`}
+                    }`}
                 >
                   <div>
                     {/* Top Row: Token ID & Status Badge */}
@@ -514,13 +511,12 @@ export default function WarrantiesView({ initialUser }) {
                         {STEPPER_ORDER.map((st, sIdx) => (
                           <div
                             key={st}
-                            className={`h-full transition-all ${
-                              stepIdx >= sIdx
+                            className={`h-full transition-all ${stepIdx >= sIdx
                                 ? sIdx === 5
                                   ? 'bg-green-500'
                                   : 'bg-indigo-500'
                                 : 'bg-slate-800'
-                            }`}
+                              }`}
                             title={WARRANTY_STATUSES[st]?.label}
                           />
                         ))}
@@ -640,11 +636,10 @@ export default function WarrantiesView({ initialUser }) {
                       key={st}
                       type="button"
                       onClick={() => setNewStatus(st)}
-                      className={`p-2 rounded-xl text-xs font-bold border transition flex items-center gap-2 ${
-                        isCur
+                      className={`p-2 rounded-xl text-xs font-bold border transition flex items-center gap-2 ${isCur
                           ? `${conf.badge} ring-1 ring-white/20`
                           : 'bg-[#141b2a] border-slate-800 text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       <span className={`w-2 h-2 rounded-full ${conf.dot}`} />
                       <span className="truncate">{conf.label}</span>
@@ -754,14 +749,13 @@ export default function WarrantiesView({ initialUser }) {
                     >
                       <div className="min-w-0 pr-2">
                         <div className="font-semibold text-white truncate">{prod.name}</div>
-                        <div className="text-[10px] text-slate-400">{prod.brandName} • SKU: {prod.sku}</div>
+                        <div className="text-[10px] text-slate-400">{prod.brandName} </div>
                       </div>
                       <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          prod.stock > 0
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${prod.stock > 0
                             ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                             : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                        }`}
+                          }`}
                       >
                         {prod.stock > 0 ? `Stock: ${prod.stock}` : 'Out of Stock'}
                       </span>
@@ -820,9 +814,8 @@ export default function WarrantiesView({ initialUser }) {
                     {selectedWarranty.ticketNumber}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      WARRANTY_STATUSES[selectedWarranty.status]?.badge
-                    }`}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${WARRANTY_STATUSES[selectedWarranty.status]?.badge
+                      }`}
                   >
                     {WARRANTY_STATUSES[selectedWarranty.status]?.label}
                   </span>

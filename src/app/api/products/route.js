@@ -62,14 +62,12 @@ export async function GET(request) {
     const query = { status: { $ne: 'ARCHIVED' } };
 
     // Search query using text index and multi-field regex across 5 key fields:
-    // 1. Product Name, 2. SKU, 3. Brand, 4. Category, 5. Compatibility
+    // 1. Product Name, 2. Brand, 3. Category, 4. Compatibility
     let hasTextSearch = false;
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const orConditions = [
         { name: { $regex: escaped, $options: 'i' } },
-        { sku: { $regex: `^${escaped}`, $options: 'i' } },
-        { sku: { $regex: escaped, $options: 'i' } },
         { brandName: { $regex: escaped, $options: 'i' } },
         { categoryName: { $regex: escaped, $options: 'i' } },
         { compatibility: { $elemMatch: { $regex: escaped, $options: 'i' } } },
@@ -176,7 +174,6 @@ export async function POST(request) {
       brandId,
       brandName,
       brand,
-      sku,
       price,
       mrp,
       stock,
@@ -252,34 +249,6 @@ export async function POST(request) {
       );
     }
 
-    // Clean & normalize SKU or auto-generate unique SKU if omitted
-    let normalizedSku = typeof sku === 'string' && sku.trim() ? sku.trim().toUpperCase() : '';
-    if (!normalizedSku) {
-      const brandPrefix = (brandDoc.name || 'ACC')
-        .replace(/[^a-zA-Z0-9]/g, '')
-        .slice(0, 3)
-        .toUpperCase() || 'ACC';
-      let candidate = '';
-      let isUnique = false;
-      while (!isUnique) {
-        const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-        candidate = `${brandPrefix}-${Date.now().toString().slice(-4)}-${rand}`;
-        const conflict = await Product.findOne({ sku: candidate });
-        if (!conflict) {
-          isUnique = true;
-        }
-      }
-      normalizedSku = candidate;
-    } else {
-      const existingSku = await Product.findOne({ sku: normalizedSku });
-      if (existingSku) {
-        return NextResponse.json(
-          { error: `SKU "${normalizedSku}" is already in use by another product` },
-          { status: 400 }
-        );
-      }
-    }
-
     // Validate images (strictly reject data-URI / binary buffers, max 3 images)
     const validImages = Array.isArray(images)
       ? images.filter((img) => typeof img === 'string' && img.trim() && !img.startsWith('data:image/'))
@@ -298,7 +267,6 @@ export async function POST(request) {
       categoryName: categoryDoc.name,
       brand: brandDoc._id,
       brandName: brandDoc.name,
-      sku: normalizedSku,
       price: parsedPrice,
       mrp: parsedMrp,
       inStock: isAvailable,

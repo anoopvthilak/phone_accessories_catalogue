@@ -315,7 +315,7 @@ export default function NewWarrantyModal({
                         className="p-2.5 hover:bg-indigo-600/10 cursor-pointer flex items-center justify-between"
                       >
                         <div className="text-xs font-semibold text-white">{prod.name}</div>
-                        <div className="text-[10px] text-slate-400">{prod.brandName} • SKU: {prod.sku}</div>
+                        <div className="text-[10px] text-slate-400">{prod.brandName}</div>
                       </div>
                     ))}
                   </div>
@@ -502,16 +502,14 @@ export default function NewWarrantyModal({
                         <div className="text-xs font-semibold text-white truncate">{prod.name}</div>
                         <div className="text-[10px] text-slate-400 flex items-center gap-1.5">
                           <span>{prod.brandName}</span>
-                          {prod.sku && <span>• SKU: {prod.sku}</span>}
                           {prod.price && <span className="text-indigo-400 font-semibold">• ₹{prod.price}</span>}
                         </div>
                       </div>
                       <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          prod.stock > 0
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                        }`}
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${prod.stock > 0
+                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                          }`}
                       >
                         {prod.stock > 0 ? `In Stock (${prod.stock})` : 'Out of Stock'}
                       </span>

@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ProductImageUploader from '@/components/ProductImageUploader';
 
 export default function AddProductPage() {
+  const router = useRouter();
 
   // Form states
   const [name, setName] = useState('');
@@ -42,9 +44,6 @@ export default function AddProductPage() {
         if (catRes.ok) {
           const d = await catRes.json();
           setCategories(d.categories || []);
-          if (d.categories?.length > 0) {
-            setCategoryId(d.categories[0]._id);
-          }
         }
 
         if (brandRes.ok) {
@@ -95,6 +94,25 @@ export default function AddProductPage() {
     const updated = { ...specifications };
     delete updated[keyToRemove];
     setSpecifications(updated);
+  };
+
+  const handleResetForm = () => {
+    setName('');
+    setCategoryId('');
+    setBrandName('');
+    setPrice('');
+    setMrp('');
+    setInStock(true);
+    setImages([]);
+    setDescription('');
+    setSpecKey('');
+    setSpecVal('');
+    setSpecifications({});
+    setCompatibility([]);
+    setCustomDevice('');
+    setWarranty('1 Year Manufacturer Warranty');
+    setSuccess(false);
+    setError('');
   };
 
   // Form submission
@@ -166,10 +184,10 @@ export default function AddProductPage() {
         throw new Error(data.error || 'Failed to create product');
       }
 
-      setSuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Reset form after short delay or leave options
+      // Clear form data and navigate to product catalogue page
+      handleResetForm();
+      router.push('/');
+      router.refresh();
     } catch (err) {
       setError(err.message);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -178,22 +196,8 @@ export default function AddProductPage() {
     }
   };
 
-  const handleResetForm = () => {
-    setName('');
-    setBrandName('');
-    setPrice('');
-    setMrp('');
-    setInStock(true);
-    setImages([]);
-    setDescription('');
-    setSpecifications({});
-    setCompatibility([]);
-    setSuccess(false);
-    setError('');
-  };
-
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 pb-32">
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 pb-32 overflow-x-hidden">
       {/* Mobile Top Navigation Bar */}
       <header className="sticky top-0 z-30 bg-[#0b0f19]/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3.5">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
@@ -270,7 +274,7 @@ export default function AddProductPage() {
             {/* Product Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-2">
-                Product Title / Name *
+                Product Name *
               </label>
               <input
                 type="text"
@@ -290,9 +294,11 @@ export default function AddProductPage() {
                 </label>
                 <select
                   value={categoryId}
+                  required
                   onChange={(e) => setCategoryId(e.target.value)}
                   className="w-full px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
                 >
+                  <option value="">Select Category</option>
                   {categories.map((c) => (
                     <option key={c._id} value={c._id}>
                       {c.name}
@@ -382,8 +388,8 @@ export default function AddProductPage() {
                     type="button"
                     onClick={() => setInStock(true)}
                     className={`py-3 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${inStock
-                        ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/60 shadow-md shadow-emerald-500/10'
-                        : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/60 shadow-md shadow-emerald-500/10'
+                      : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
                       }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -393,8 +399,8 @@ export default function AddProductPage() {
                     type="button"
                     onClick={() => setInStock(false)}
                     className={`py-3 px-3 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${!inStock
-                        ? 'bg-rose-500/20 text-rose-300 border-2 border-rose-500/60 shadow-md shadow-rose-500/10'
-                        : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
+                      ? 'bg-rose-500/20 text-rose-300 border-2 border-rose-500/60 shadow-md shadow-rose-500/10'
+                      : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
                       }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-rose-400" />
@@ -424,7 +430,7 @@ export default function AddProductPage() {
           />
 
           {/* Card 4: Device Compatibility & Specifications */}
-          <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl">
+          <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl overflow-hidden">
             <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               4. Compatibility & Specs
@@ -437,7 +443,7 @@ export default function AddProductPage() {
               </label>
 
               {/* Custom Device Input */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-3 min-w-0">
                 <input
                   type="text"
                   value={customDevice}
@@ -448,13 +454,13 @@ export default function AddProductPage() {
                       handleAddCustomDevice(e);
                     }
                   }}
-                  placeholder="Enter model name (e.g. iPhone 16 Pro, Galaxy S24, Universal USB-C)"
-                  className="flex-1 px-4 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+                  placeholder="Enter model name (e.g. Galaxy S24,..)"
+                  className="flex-1 min-w-0 px-4 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
                 />
                 <button
                   type="button"
                   onClick={handleAddCustomDevice}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
+                  className="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
                 >
                   Add Model
                 </button>
@@ -466,13 +472,13 @@ export default function AddProductPage() {
                   {compatibility.map((device) => (
                     <div
                       key={device}
-                      className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2 font-medium"
+                      className="max-w-full px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2 font-medium"
                     >
-                      <span>{device}</span>
+                      <span className="break-all">{device}</span>
                       <button
                         type="button"
                         onClick={() => toggleCompatibility(device)}
-                        className="text-amber-400/70 hover:text-amber-200 font-bold ml-1 cursor-pointer"
+                        className="text-amber-400/70 hover:text-amber-200 font-bold ml-1 cursor-pointer shrink-0"
                         title="Remove device"
                       >
                         ✕
@@ -491,15 +497,23 @@ export default function AddProductPage() {
                 Specifications
               </label>
 
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
                 <input
                   type="text"
                   value={specKey}
                   onChange={(e) => setSpecKey(e.target.value)}
-                  placeholder="Feature (e.g. Wattage, Material, Cable Length)"
-                  className="px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (specVal.trim()) {
+                        handleAddSpec();
+                      }
+                    }
+                  }}
+                  placeholder="Feature (e.g. Wattage, Material)"
+                  className="w-full min-w-0 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 min-w-0">
                   <input
                     type="text"
                     value={specVal}
@@ -510,15 +524,17 @@ export default function AddProductPage() {
                         handleAddSpec();
                       }
                     }}
-                    placeholder="Value (e.g. 65W, Braided Nylon, 1.8m)"
-                    className="flex-1 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Value (e.g. 65W, Braided)"
+                    className="flex-1 min-w-0 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="button"
                     onClick={handleAddSpec}
-                    className="px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white cursor-pointer"
+                    className="shrink-0 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white cursor-pointer transition flex items-center justify-center gap-1"
+                    title="Add Specification"
                   >
-                    +
+                    <span>+</span>
+                    <span>Add</span>
                   </button>
                 </div>
               </div>
@@ -529,14 +545,15 @@ export default function AddProductPage() {
                   {Object.entries(specifications).map(([k, v]) => (
                     <div
                       key={k}
-                      className="px-3 py-1.5 rounded-xl bg-[#1b2538] border border-slate-700 text-xs flex items-center gap-2 text-slate-200"
+                      className="max-w-full px-3 py-1.5 rounded-xl bg-[#1b2538] border border-slate-700 text-xs flex items-center gap-2 text-slate-200"
                     >
-                      <span className="text-slate-400">{k}:</span>
-                      <span className="font-semibold">{v}</span>
+                      <span className="text-slate-400 shrink-0">{k}:</span>
+                      <span className="font-semibold break-all">{v}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSpec(k)}
-                        className="text-rose-400 hover:text-rose-300 font-bold ml-1 cursor-pointer"
+                        className="text-rose-400 hover:text-rose-300 font-bold ml-1 cursor-pointer shrink-0"
+                        title={`Remove ${k}`}
                       >
                         ✕
                       </button>

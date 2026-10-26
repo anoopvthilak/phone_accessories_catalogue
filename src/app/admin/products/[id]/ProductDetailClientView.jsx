@@ -103,11 +103,10 @@ export default function ProductDetailClientView({ product, user }) {
             {/* In stock badge */}
             <div className="absolute bottom-4 left-4 sm:left-6">
               <span
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg ${
-                  isInStock
-                    ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
-                }`}
+                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg ${isInStock
+                  ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
+                  }`}
               >
                 <span className={`w-2 h-2 rounded-full ${isInStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
                 {isInStock ? `In Stock • ${product.stock} Units Available` : 'Currently Out of Stock'}
@@ -123,11 +122,10 @@ export default function ProductDetailClientView({ product, user }) {
                   key={idx}
                   type="button"
                   onClick={() => setSelectedImage(img)}
-                  className={`w-16 h-16 rounded-xl bg-[#172032] border-2 p-1 overflow-hidden flex-shrink-0 cursor-pointer transition ${
-                    selectedImage === img
-                      ? 'border-blue-500 shadow-md shadow-blue-500/30 scale-105'
-                      : 'border-slate-800 opacity-60 hover:opacity-100'
-                  }`}
+                  className={`w-16 h-16 rounded-xl bg-[#172032] border-2 p-1 overflow-hidden flex-shrink-0 cursor-pointer transition ${selectedImage === img
+                    ? 'border-blue-500 shadow-md shadow-blue-500/30 scale-105'
+                    : 'border-slate-800 opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-contain" />
                 </button>
@@ -145,9 +143,6 @@ export default function ProductDetailClientView({ product, user }) {
               </span>
               <span className="text-xs text-slate-400">
                 • {product.categoryName}
-              </span>
-              <span className="text-xs text-slate-500 ml-auto font-mono bg-[#182234] px-3 py-1 rounded-xl border border-slate-700/60">
-                SKU: {product.sku}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">

@@ -41,8 +41,8 @@ export default function ProductDetailModal({
     product.specifications instanceof Map
       ? Array.from(product.specifications.entries())
       : typeof product.specifications === 'object' && product.specifications !== null
-      ? Object.entries(product.specifications)
-      : [];
+        ? Object.entries(product.specifications)
+        : [];
 
   const canEdit = user?.role === 'ADMIN' || user?.role === 'STAFF';
   const canDelete = user?.role === 'ADMIN';
@@ -118,11 +118,10 @@ export default function ProductDetailModal({
               <button
                 type="button"
                 onClick={() => setIsLiked(!isLiked)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-md shadow-lg transition cursor-pointer ${
-                  isLiked
+                className={`w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-md shadow-lg transition cursor-pointer ${isLiked
                     ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
                     : 'bg-[#161e2e]/90 text-slate-200 hover:text-white border-slate-700/60'
-                }`}
+                  }`}
                 title={isLiked ? 'Saved' : 'Save'}
               >
                 <svg
@@ -169,16 +168,14 @@ export default function ProductDetailModal({
               {/* In stock badge overlay */}
               <div className="absolute bottom-4 left-6">
                 <span
-                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg ${
-                    isInStock
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg ${isInStock
                       ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
                       : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      isInStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-                    }`}
+                    className={`w-2 h-2 rounded-full ${isInStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                      }`}
                   />
                   {isInStock
                     ? `In Stock • ${product.stock || 1} Units Available`
@@ -195,11 +192,10 @@ export default function ProductDetailModal({
                     key={idx}
                     type="button"
                     onClick={() => setSelectedImageOverride(img)}
-                    className={`relative w-14 h-14 rounded-xl bg-[#141b28] border-2 overflow-hidden flex-shrink-0 p-1 cursor-pointer transition ${
-                      selectedImage === img
+                    className={`relative w-14 h-14 rounded-xl bg-[#141b28] border-2 overflow-hidden flex-shrink-0 p-1 cursor-pointer transition ${selectedImage === img
                         ? 'border-blue-500 shadow-md shadow-blue-500/30 scale-105'
                         : 'border-slate-800 opacity-60 hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-contain" />
                   </button>
@@ -217,9 +213,6 @@ export default function ProductDetailModal({
                   </span>
                   <span className="text-xs text-slate-400">
                     • {product.categoryName}
-                  </span>
-                  <span className="text-xs text-slate-500 ml-auto font-mono">
-                    SKU: {product.sku}
                   </span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">

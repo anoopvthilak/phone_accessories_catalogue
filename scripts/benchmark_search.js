@@ -59,7 +59,6 @@ async function benchmark() {
         const device = devices[itemIdx % devices.length];
 
         const name = `${brand.name} ${adj} ${typ} for ${device} #${itemIdx}`;
-        const sku = `${brand.name.slice(0, 3).toUpperCase()}-${category.name.slice(0, 3).toUpperCase()}-${itemIdx}`;
         const price = 499 + (itemIdx % 50) * 100;
         const mrp = price + 300 + (itemIdx % 10) * 50;
 
@@ -69,7 +68,6 @@ async function benchmark() {
           categoryName: category.name,
           brand: brand._id,
           brandName: brand.name,
-          sku,
           price,
           mrp,
           images: ['https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80'],
@@ -93,13 +91,11 @@ async function benchmark() {
 
   // Test queries across:
   // 1. Product Name
-  // 2. SKU
-  // 3. Brand
-  // 4. Category
-  // 5. Compatibility
+  // 2. Brand
+  // 3. Category
+  // 4. Compatibility
   const testTerms = [
     { label: 'Product Name search ("Charger")', term: 'Charger' },
-    { label: 'SKU exact search ("ANK-CHA-100")', term: 'ANK-CHA-100' },
     { label: 'Brand search ("Spigen")', term: 'Spigen' },
     { label: 'Category search ("Mobile Covers")', term: 'Mobile Covers' },
     { label: 'Compatibility search ("Galaxy S24 Ultra")', term: 'Galaxy S24 Ultra' },
@@ -113,8 +109,6 @@ async function benchmark() {
       $or: [
         { $text: { $search: term } },
         { name: { $regex: escaped, $options: 'i' } },
-        { sku: { $regex: `^${escaped}`, $options: 'i' } },
-        { sku: { $regex: escaped, $options: 'i' } },
         { brandName: { $regex: escaped, $options: 'i' } },
         { categoryName: { $regex: escaped, $options: 'i' } },
         { compatibility: { $elemMatch: { $regex: escaped, $options: 'i' } } },

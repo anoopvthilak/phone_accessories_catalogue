@@ -35,8 +35,7 @@ export default function ProductImageUploader({
 
     if (filesToUpload.length > remainingSlots) {
       setError(
-        `You can only add up to ${remainingSlots} more image${
-          remainingSlots === 1 ? '' : 's'
+        `You can only add up to ${remainingSlots} more image${remainingSlots === 1 ? '' : 's'
         } (maximum ${maxImages} total).`
       );
       return;
@@ -154,7 +153,7 @@ export default function ProductImageUploader({
       try {
         fetch(`/api/upload?url=${encodeURIComponent(targetUrl)}`, {
           method: 'DELETE',
-        }).catch(() => {});
+        }).catch(() => { });
       } catch {
         // Silent catch for background cleanup
       }
@@ -223,11 +222,10 @@ export default function ProductImageUploader({
         {/* Counter Badge */}
         <div className="flex items-center gap-2">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-              images.length === maxImages
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${images.length === maxImages
                 ? 'bg-purple-500/10 text-purple-400 border-purple-500/30'
                 : 'bg-slate-800/80 text-slate-300 border-slate-700/60'
-            }`}
+              }`}
           >
             {images.length} / {maxImages} images
           </span>
@@ -260,11 +258,10 @@ export default function ProductImageUploader({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
-            isDragOver
+          className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${isDragOver
               ? 'border-purple-500 bg-purple-500/10 scale-[1.01]'
               : 'border-slate-700 hover:border-purple-500/70 bg-[#151d2d]/60 hover:bg-[#182236]'
-          } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
+            } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
         >
           <input
             ref={fileInputRef}
@@ -280,7 +277,6 @@ export default function ProductImageUploader({
             <div className="flex flex-col items-center gap-3 py-2">
               <div className="w-9 h-9 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
               <p className="text-sm font-medium text-purple-300">{uploadProgressText}</p>
-              <p className="text-xs text-slate-500">Storing securely on DigitalOcean Spaces</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -298,10 +294,6 @@ export default function ProductImageUploader({
               <p className="text-xs text-slate-400">
                 Upload up to {remainingSlots} more image{remainingSlots === 1 ? '' : 's'} (Camera & gallery photos auto-optimized)
               </p>
-              <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                DigitalOcean Spaces CDN
-              </span>
             </div>
           )}
         </div>
@@ -391,9 +383,8 @@ export default function ProductImageUploader({
             {images.map((img, idx) => (
               <div
                 key={idx}
-                className={`relative rounded-2xl bg-[#161f30] border ${
-                  idx === 0 ? 'border-purple-500/60 ring-2 ring-purple-500/20' : 'border-slate-700/80'
-                } p-2 flex flex-col justify-between shadow-lg group transition-all`}
+                className={`relative rounded-2xl bg-[#161f30] border ${idx === 0 ? 'border-purple-500/60 ring-2 ring-purple-500/20' : 'border-slate-700/80'
+                  } p-2 flex flex-col justify-between shadow-lg group transition-all`}
               >
                 {/* Image Container */}
                 <div className="relative w-full aspect-[4/3] rounded-xl bg-[#0f141c] overflow-hidden flex items-center justify-center p-2 mb-2">

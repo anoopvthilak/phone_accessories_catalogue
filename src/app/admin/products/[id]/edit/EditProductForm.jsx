@@ -27,7 +27,6 @@ export default function EditProductForm({
   const [price, setPrice] = useState(initialProduct.price?.toString() || '');
   const [mrp, setMrp] = useState(initialProduct.mrp?.toString() || '');
   const [inStock, setInStock] = useState(initialProduct.inStock !== false && initialProduct.status !== 'OUT_OF_STOCK');
-  const [stock, setStock] = useState(initialProduct.stock?.toString() || '1');
   const [images, setImages] = useState(initialProduct.images || []);
   const [description, setDescription] = useState(initialProduct.description || '');
   const [specKey, setSpecKey] = useState('');
@@ -134,7 +133,6 @@ export default function EditProductForm({
           price: numPrice,
           mrp: numMrp,
           inStock: inStock,
-          stock: inStock ? Math.max(1, parseInt(stock, 10) || 1) : 0,
           status: inStock ? 'ACTIVE' : 'OUT_OF_STOCK',
           images: finalImages,
           description: description.trim(),
@@ -150,14 +148,35 @@ export default function EditProductForm({
         throw new Error(data.error || 'Failed to update product');
       }
 
-      setSuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Clear form data and navigate to product catalogue page
+      handleResetForm();
+      router.push('/');
+      router.refresh();
     } catch (err) {
       setError(err.message);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResetForm = () => {
+    setName('');
+    setCategoryId('');
+    setBrandName('');
+    setPrice('');
+    setMrp('');
+    setInStock(true);
+    setImages([]);
+    setDescription('');
+    setSpecKey('');
+    setSpecVal('');
+    setSpecifications({});
+    setCompatibility([]);
+    setCustomDevice('');
+    setWarranty('1 Year Manufacturer Warranty');
+    setSuccess(false);
+    setError('');
   };
 
   const handleDeleted = () => {
@@ -355,26 +374,6 @@ export default function EditProductForm({
                 </div>
               </div>
 
-              {/* Stock Units */}
-              <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  Stock Units Count
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={stock}
-                  onChange={(e) => {
-                    setStock(e.target.value);
-                    if (parseInt(e.target.value, 10) > 0) {
-                      setInStock(true);
-                    } else if (parseInt(e.target.value, 10) === 0) {
-                      setInStock(false);
-                    }
-                  }}
-                  className="w-full px-4 py-3 bg-[#182234] border border-slate-700/60 rounded-2xl text-white font-bold text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-                />
-              </div>
 
               {/* Stock Availability Toggle */}
               <div className="col-span-2 sm:col-span-3">
@@ -386,13 +385,11 @@ export default function EditProductForm({
                     type="button"
                     onClick={() => {
                       setInStock(true);
-                      if (parseInt(stock, 10) <= 0) setStock('1');
                     }}
-                    className={`py-3 px-4 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                      inStock
-                        ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/60 shadow-md shadow-emerald-500/10'
-                        : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
-                    }`}
+                    className={`py-3 px-4 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${inStock
+                      ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/60 shadow-md shadow-emerald-500/10'
+                      : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
+                      }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     In Stock
@@ -401,13 +398,11 @@ export default function EditProductForm({
                     type="button"
                     onClick={() => {
                       setInStock(false);
-                      setStock('0');
                     }}
-                    className={`py-3 px-4 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                      !inStock
-                        ? 'bg-rose-500/20 text-rose-300 border-2 border-rose-500/60 shadow-md shadow-rose-500/10'
-                        : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
-                    }`}
+                    className={`py-3 px-4 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${!inStock
+                      ? 'bg-rose-500/20 text-rose-300 border-2 border-rose-500/60 shadow-md shadow-rose-500/10'
+                      : 'bg-[#182234] text-slate-400 hover:text-slate-200 border border-slate-700/60'
+                      }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-rose-400" />
                     Out of Stock
@@ -436,7 +431,7 @@ export default function EditProductForm({
           />
 
           {/* Card 4: Device Compatibility & Specifications */}
-          <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl">
+          <section className="bg-[#121826] border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl overflow-hidden">
             <h2 className="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               4. Compatibility & Specs
@@ -449,7 +444,7 @@ export default function EditProductForm({
               </label>
 
               {/* Custom Device Input */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-3 min-w-0">
                 <input
                   type="text"
                   value={customDevice}
@@ -461,12 +456,12 @@ export default function EditProductForm({
                     }
                   }}
                   placeholder="Enter model name (e.g. iPhone 16 Pro, Galaxy S24, Universal USB-C)"
-                  className="flex-1 px-4 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+                  className="flex-1 min-w-0 px-4 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
                 />
                 <button
                   type="button"
                   onClick={handleAddCustomDevice}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
+                  className="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 cursor-pointer"
                 >
                   Add Model
                 </button>
@@ -478,13 +473,13 @@ export default function EditProductForm({
                   {compatibility.map((device) => (
                     <div
                       key={device}
-                      className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2 font-medium"
+                      className="max-w-full px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2 font-medium"
                     >
-                      <span>{device}</span>
+                      <span className="break-all">{device}</span>
                       <button
                         type="button"
                         onClick={() => toggleCompatibility(device)}
-                        className="text-amber-400/70 hover:text-amber-200 font-bold ml-1 cursor-pointer"
+                        className="text-amber-400/70 hover:text-amber-200 font-bold ml-1 cursor-pointer shrink-0"
                         title="Remove device"
                       >
                         ✕
@@ -503,15 +498,23 @@ export default function EditProductForm({
                 Specifications
               </label>
 
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
                 <input
                   type="text"
                   value={specKey}
                   onChange={(e) => setSpecKey(e.target.value)}
-                  placeholder="Feature (e.g. Wattage, Material, Cable Length)"
-                  className="px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (specVal.trim()) {
+                        handleAddSpec();
+                      }
+                    }
+                  }}
+                  placeholder="Feature (e.g. Wattage, Material)"
+                  className="w-full min-w-0 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 min-w-0">
                   <input
                     type="text"
                     value={specVal}
@@ -522,15 +525,17 @@ export default function EditProductForm({
                         handleAddSpec();
                       }
                     }}
-                    placeholder="Value (e.g. 65W, Braided Nylon, 1.8m)"
-                    className="flex-1 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Value (e.g. 65W, Braided)"
+                    className="flex-1 min-w-0 px-3.5 py-2.5 bg-[#182234] border border-slate-700/60 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="button"
                     onClick={handleAddSpec}
-                    className="px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white cursor-pointer"
+                    className="shrink-0 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white cursor-pointer transition flex items-center justify-center gap-1"
+                    title="Add Specification"
                   >
-                    +
+                    <span>+</span>
+                    <span>Add</span>
                   </button>
                 </div>
               </div>
@@ -541,14 +546,15 @@ export default function EditProductForm({
                   {Object.entries(specifications).map(([k, v]) => (
                     <div
                       key={k}
-                      className="px-3 py-1.5 rounded-xl bg-[#1b2538] border border-slate-700 text-xs flex items-center gap-2 text-slate-200"
+                      className="max-w-full px-3 py-1.5 rounded-xl bg-[#1b2538] border border-slate-700 text-xs flex items-center gap-2 text-slate-200"
                     >
-                      <span className="text-slate-400">{k}:</span>
-                      <span className="font-semibold">{v}</span>
+                      <span className="text-slate-400 shrink-0">{k}:</span>
+                      <span className="font-semibold break-all">{v}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveSpec(k)}
-                        className="text-rose-400 hover:text-rose-300 font-bold ml-1 cursor-pointer"
+                        className="text-rose-400 hover:text-rose-300 font-bold ml-1 cursor-pointer shrink-0"
+                        title={`Remove ${k}`}
                       >
                         ✕
                       </button>

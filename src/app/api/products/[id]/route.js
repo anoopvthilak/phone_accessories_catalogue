@@ -119,7 +119,6 @@ export async function PUT(request, { params }) {
       brandId,
       brandName,
       brand,
-      sku,
       price,
       mrp,
       stock,
@@ -201,20 +200,6 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Validate SKU uniqueness (excluding this product)
-    const normalizedSku = (typeof sku === 'string' && sku.trim() ? sku.trim().toUpperCase() : existingProduct.sku);
-    const skuConflict = await Product.findOne({
-      sku: normalizedSku,
-      _id: { $ne: id },
-    });
-
-    if (skuConflict) {
-      return NextResponse.json(
-        { error: `SKU "${normalizedSku}" is already used by another product (${skuConflict.name})` },
-        { status: 400 }
-      );
-    }
-
     // Strictly validate image URLs (no data URIs / binaries in MongoDB, max 3 images)
     const validImages = Array.isArray(images)
       ? images.filter((img) => typeof img === 'string' && img.trim() && !img.startsWith('data:image/'))
@@ -241,7 +226,6 @@ export async function PUT(request, { params }) {
     existingProduct.categoryName = categoryDoc.name;
     existingProduct.brand = brandDoc._id;
     existingProduct.brandName = brandDoc.name;
-    existingProduct.sku = normalizedSku;
     existingProduct.price = parsedPrice;
     existingProduct.mrp = parsedMrp;
     existingProduct.inStock = isAvailable;
@@ -311,7 +295,6 @@ export async function DELETE(request, { params }) {
     }
 
     const productName = product.name;
-    const productSku = product.sku;
 
     // Permanently remove product from collection
     await Product.findByIdAndDelete(id);
@@ -329,7 +312,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: `Product "${productName}" (${productSku}) was permanently removed from catalogue`,
+      message: `Product "${productName}" was permanently removed from catalogue`,
     });
   } catch (error) {
     if (error?.digest) throw error;

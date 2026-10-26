@@ -33,14 +33,6 @@ const ProductSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
-    sku: {
-      type: String,
-      required: [true, 'Please provide SKU'],
-      unique: true,
-      trim: true,
-      uppercase: true,
-      maxlength: [50, 'SKU cannot exceed 50 characters'],
-    },
     price: {
       type: Number,
       required: [true, 'Please provide selling price'],
@@ -140,11 +132,10 @@ ProductSchema.pre('save', function () {
   }
 });
 
-// Text index for multi-field search across product title, brand, category, compatibility, SKU & description
+// Text index for multi-field search across product title, brand, category, compatibility & description
 ProductSchema.index(
   {
     name: 'text',
-    sku: 'text',
     brandName: 'text',
     compatibility: 'text',
     categoryName: 'text',
@@ -153,7 +144,6 @@ ProductSchema.index(
   {
     weights: {
       name: 10,
-      sku: 8,
       brandName: 6,
       compatibility: 5,
       categoryName: 3,
@@ -164,7 +154,6 @@ ProductSchema.index(
 );
 
 // Active status + search field compound indexes for filtered search across 10,000+ products
-ProductSchema.index({ status: 1, sku: 1 });
 ProductSchema.index({ status: 1, name: 1 });
 ProductSchema.index({ status: 1, brandName: 1 });
 ProductSchema.index({ status: 1, categoryName: 1 });
